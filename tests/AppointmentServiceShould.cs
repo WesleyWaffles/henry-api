@@ -6,16 +6,14 @@ namespace Henry.Api.UnitTests
 {
     public class AppointmentServiceShould
     {
-        private Provider _globalProvider;
-        private Client _globalClient;
-        private DateTime _globalDefaultDateTime;
+        private string _globalProvider;
+        private string _globalClient;
 
         [SetUp]
         public void Setup()
         {
-            _globalProvider = new Provider { Id = 1, Name = "Lando Calrisian" };
-            _globalClient = new Client { Id = 1, Name = "Han Solo", Email = "Han.Solo@FalconMail.com" };
-            _globalDefaultDateTime = new DateTime(1, 1, 1, 0, 0, 0);
+            _globalProvider = "Lando Calrisian";
+            _globalClient = "Han Solo";
         }
 
         [Test]
@@ -26,8 +24,8 @@ namespace Henry.Api.UnitTests
             
             var tooLongAppointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(14, 0)
@@ -44,8 +42,8 @@ namespace Henry.Api.UnitTests
 
             var validAppointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15)
@@ -63,8 +61,8 @@ namespace Henry.Api.UnitTests
 
             var validAppointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15)
@@ -72,7 +70,7 @@ namespace Henry.Api.UnitTests
 
             await sut.Add(validAppointment);
             await sut.Reserve(validAppointment);
-            Assert.That(validAppointment.ReservedOn, Is.GreaterThan(_globalDefaultDateTime));
+            Assert.That(validAppointment.ReservedOn, Is.Not.Null);
         }
 
         [Test]
@@ -83,8 +81,8 @@ namespace Henry.Api.UnitTests
 
             var staleAppointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -103,8 +101,8 @@ namespace Henry.Api.UnitTests
 
             var freshAppointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -124,8 +122,8 @@ namespace Henry.Api.UnitTests
 
             var appointment = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -144,8 +142,8 @@ namespace Henry.Api.UnitTests
 
             var appointment1 = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -154,8 +152,8 @@ namespace Henry.Api.UnitTests
 
             var appointment2 = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 15),
                 AppointmentTo = new TimeOnly(13, 30),
@@ -164,8 +162,8 @@ namespace Henry.Api.UnitTests
 
             var appointment3 = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 30),
                 AppointmentTo = new TimeOnly(13, 45),
@@ -175,8 +173,8 @@ namespace Henry.Api.UnitTests
 
             var appointment4 = new Appointment
             {
-                Client = _globalClient,
-                Provider = _globalProvider,
+                ClientName = _globalClient,
+                ProviderName = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 45),
                 AppointmentTo = new TimeOnly(14, 0),

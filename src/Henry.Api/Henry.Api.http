@@ -1,20 +1,15 @@
 ﻿@Henry.Api_HostAddress = https://localhost:7281
 
-POST {{Henry.Api_HostAddress}}/api/v0/providers
+POST {{Henry.Api_HostAddress}}/api/v0/appointments
 Content-Type: application/json
 
 {
-  "name": "Henry"
+  "providerName": "Lando Calrissian",
+  "appointmentOn": "2024-01-10",
+  "appointmentFrom": "13:00:00",
+  "appointmentTo": "13:15:00"
 }
 
 ###
 
-POST {{Henry.Api_HostAddress}}/api/v0/clients
-Content-Type: application/json
-
-{
-  "name": "Lando Calrisian",
-  "email": "TheResponsibleLando@cloudcity.bespin"
-}
-
-###
+GET {{Henry.Api_HostAddress}}/api/v0/appointments

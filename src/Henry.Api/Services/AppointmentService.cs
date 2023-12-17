@@ -68,7 +68,7 @@ namespace Henry.Api.Services
         { 
             return await _db.Appointments
                 .Where(x => x.Confirmed == false
-                    && x.ReservedOn > DateTime.Now.AddMinutes(-30))
+                    && (x.ReservedOn == null || x.ReservedOn > DateTime.Now.AddMinutes(-30)))
                 .ToListAsync();
         }
 
@@ -113,8 +113,8 @@ namespace Henry.Api.Services
         private async Task<bool> AppointmentExists(Appointment appointment)
         {
             var appointmentExistsQuery = _db.Appointments.Where(x => 
-                x.Provider == appointment.Provider
-                && x.Client == appointment.Client
+                x.ProviderName == appointment.ProviderName
+                && x.ClientName == appointment.ClientName
                 && x.AppointmentOn == appointment.AppointmentOn 
                 && x.AppointmentFrom == appointment.AppointmentFrom
                 && x.AppointmentTo == appointment.AppointmentTo);

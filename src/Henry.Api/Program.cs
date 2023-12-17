@@ -18,7 +18,5 @@ db?.Database.MigrateAsync();
 
 // Map v0 endpoints
 app.MapGroup("/api/v0/appointments").MapAppointmentsEndpointsV0();
-app.MapGroup("/api/v0/providers").MapProvidersEndpointsV0();
-app.MapGroup("/api/v0/clients").MapClientsEndpointsV0();
 
 app.Run();
