@@ -5,23 +5,35 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{138D8EC3-ABCF-460D-8296-2485A7E16D4D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Henry.Api", "src\Henry.Api\Henry.Api.csproj", "{D8256D6C-E945-4A4F-A282-E738771FB650}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Henry.Api", "src\Henry.Api\Henry.Api.csproj", "{D8256D6C-E945-4A4F-A282-E738771FB650}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CBDC8BE1-3254-4566-811D-D2F4CEB26DFE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Henry.Api.UnitTests", "tests\Henry.Api.UnitTests.csproj", "{4219ADAA-0618-4029-A240-979656A61AA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D8256D6C-E945-4A4F-A282-E738771FB650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D8256D6C-E945-4A4F-A282-E738771FB650}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8256D6C-E945-4A4F-A282-E738771FB650}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8256D6C-E945-4A4F-A282-E738771FB650}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4219ADAA-0618-4029-A240-979656A61AA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4219ADAA-0618-4029-A240-979656A61AA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4219ADAA-0618-4029-A240-979656A61AA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4219ADAA-0618-4029-A240-979656A61AA8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D8256D6C-E945-4A4F-A282-E738771FB650} = {138D8EC3-ABCF-460D-8296-2485A7E16D4D}
+		{4219ADAA-0618-4029-A240-979656A61AA8} = {CBDC8BE1-3254-4566-811D-D2F4CEB26DFE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3562728F-9ED1-4A89-84AD-BFE5B1450215}
 	EndGlobalSection
 EndGlobal
