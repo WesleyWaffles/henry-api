@@ -8,5 +8,7 @@
         public DateOnly AppointmentOn { get; set; }
         public TimeOnly AppointmentFrom { get; set; }
         public TimeOnly AppointmentTo { get; set; }
+        public DateTime ReservedOn { get; set; }
+        public  bool Confirmed { get; set; }
     }
 }
