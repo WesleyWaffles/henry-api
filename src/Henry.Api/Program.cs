@@ -4,8 +4,10 @@ using Henry.Api;
 using Henry.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddDbContext<HenryDbContenxt>(options => 
     options.UseSqlite($"Data Source={Path.Join(Directory.GetCurrentDirectory(), "Databases", "Henry.db")}"));
+
 builder.Services.AddTransient<AppointmentService>();
 
 var app = builder.Build();
