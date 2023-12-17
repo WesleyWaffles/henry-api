@@ -68,7 +68,7 @@ namespace Henry.Api.Services
         { 
             return await _db.Appointments
                 .Where(x => x.Confirmed == false
-                    && x.ReservedOn > DateTime.Now.AddMinutes(-15))
+                    && x.ReservedOn > DateTime.Now.AddMinutes(-30))
                 .ToListAsync();
         }
 
@@ -103,7 +103,7 @@ namespace Henry.Api.Services
         /// </summary>
         /// <param name="appointment">The appointment to check</param>
         /// <returns>Boolean indicating if the appointment can be reserved</returns>
-        private bool AppointmentIsConfirmable(Appointment appointment) => appointment.ReservedOn > DateTime.Now.AddMinutes(-15);
+        private bool AppointmentIsConfirmable(Appointment appointment) => appointment.ReservedOn > DateTime.Now.AddMinutes(-30);
 
         /// <summary>
         /// Checks if an appointment already exists

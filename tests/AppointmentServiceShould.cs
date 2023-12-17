@@ -76,7 +76,7 @@ namespace Henry.Api.UnitTests
         }
 
         [Test]
-        public async Task FailToConfirmReservationsOlderThan15Minutes()
+        public async Task FailToConfirmReservationsOlderThan30Minutes()
         {
             await using var db = new InMemoryDb().CreateDbContext();
             var sut = new AppointmentService(db);
@@ -88,7 +88,7 @@ namespace Henry.Api.UnitTests
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
-                ReservedOn = DateTime.Now.AddMinutes(-16)
+                ReservedOn = DateTime.Now.AddMinutes(-31)
             };
 
             await sut.Add(staleAppointment);
@@ -96,7 +96,7 @@ namespace Henry.Api.UnitTests
         }
 
         [Test]
-        public async Task SuccessfullyConfirmReservationsNewerThan15Minutes()
+        public async Task SuccessfullyConfirmReservationsNewerThan30Minutes()
         {
             await using var db = new InMemoryDb().CreateDbContext();
             var sut = new AppointmentService(db);
@@ -108,7 +108,7 @@ namespace Henry.Api.UnitTests
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
-                ReservedOn = DateTime.Now.AddMinutes(-14)
+                ReservedOn = DateTime.Now.AddMinutes(-21)
             };
 
             await sut.Add(freshAppointment);
@@ -159,7 +159,7 @@ namespace Henry.Api.UnitTests
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 15),
                 AppointmentTo = new TimeOnly(13, 30),
-                ReservedOn = DateTime.Now.AddMinutes(-14)
+                ReservedOn = DateTime.Now.AddMinutes(-20)
             };
 
             var appointment3 = new Appointment
@@ -180,7 +180,7 @@ namespace Henry.Api.UnitTests
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 45),
                 AppointmentTo = new TimeOnly(14, 0),
-                ReservedOn = DateTime.Now.AddMinutes(-16),
+                ReservedOn = DateTime.Now.AddMinutes(-31),
             };
 
             await sut.Add(appointment1);

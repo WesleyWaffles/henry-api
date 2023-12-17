@@ -1,6 +1,6 @@
-﻿@Henry.Api_HostAddress = https://localhost:5000
+﻿@Henry.Api_HostAddress = https://localhost:7281
 
-POST {{Henry.Api_HostAddress}}/providers
+POST {{Henry.Api_HostAddress}}/api/v0/providers
 Content-Type: application/json
 
 {
@@ -9,7 +9,7 @@ Content-Type: application/json
 
 ###
 
-POST {{Henry.Api_HostAddress}}/clients
+POST {{Henry.Api_HostAddress}}/api/v0/clients
 Content-Type: application/json
 
 {
