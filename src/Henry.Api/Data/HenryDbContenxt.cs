@@ -6,7 +6,6 @@ namespace Henry.Api.Data
     {
         public DbSet<Provider> Providers { get; set; }
         public DbSet<Client> Clients { get; set; }
-        public DbSet<ProviderAvailability> ProviderAvailabilities { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
      
         public HenryDbContenxt(DbContextOptions options) : base(options)

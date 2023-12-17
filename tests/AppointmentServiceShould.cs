@@ -33,7 +33,7 @@ namespace Henry.Api.UnitTests
                 AppointmentTo = new TimeOnly(14, 0)
             };
 
-            Assert.ThrowsAsync<ValidationException>(async () => await sut.AddAppointment(tooLongAppointment));
+            Assert.ThrowsAsync<ValidationException>(async () => await sut.Add(tooLongAppointment));
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace Henry.Api.UnitTests
                 AppointmentTo = new TimeOnly(13, 15)
             };
 
-            await sut.AddAppointment(validAppointment);
+            await sut.Add(validAppointment);
             Assert.That(validAppointment.Id, Is.GreaterThan(0));
         }
 
@@ -70,8 +70,8 @@ namespace Henry.Api.UnitTests
                 AppointmentTo = new TimeOnly(13, 15)
             };
 
-            await sut.AddAppointment(validAppointment);
-            await sut.ReserveAppointment(validAppointment);
+            await sut.Add(validAppointment);
+            await sut.Reserve(validAppointment);
             Assert.That(validAppointment.ReservedOn, Is.GreaterThan(_globalDefaultDateTime));
         }
 
@@ -91,8 +91,8 @@ namespace Henry.Api.UnitTests
                 ReservedOn = DateTime.Now.AddMinutes(-16)
             };
 
-            await sut.AddAppointment(staleAppointment);
-            Assert.ThrowsAsync<ValidationException>(async () => await sut.ConfirmAppointment(staleAppointment));
+            await sut.Add(staleAppointment);
+            Assert.ThrowsAsync<ValidationException>(async () => await sut.Confirm(staleAppointment));
         }
 
         [Test]
@@ -111,9 +111,84 @@ namespace Henry.Api.UnitTests
                 ReservedOn = DateTime.Now.AddMinutes(-14)
             };
 
-            await sut.AddAppointment(freshAppointment);
-            await sut.ConfirmAppointment(freshAppointment);
+            await sut.Add(freshAppointment);
+            await sut.Confirm(freshAppointment);
             Assert.That(freshAppointment.Confirmed, Is.True);
+        }
+
+        [Test]
+        public async Task ReturnAppointmentById()
+        {
+            await using var db = new InMemoryDb().CreateDbContext();
+            var sut = new AppointmentService(db);
+
+            var appointment = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 0),
+                AppointmentTo = new TimeOnly(13, 15),
+                ReservedOn = DateTime.Now.AddMinutes(-14)
+            };
+            await sut.Add(appointment);
+            var returnedAppointment = await sut.Get(appointment.Id);
+            Assert.That(returnedAppointment?.Id, Is.EqualTo(appointment.Id));
+        }
+
+        [Test]
+        public async Task ReturnAllAvailableAppointmentsAndExcludeUnavailableAppointments()
+        {
+            await using var db = new InMemoryDb().CreateDbContext();
+            var sut = new AppointmentService(db);
+
+            var appointment1 = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 0),
+                AppointmentTo = new TimeOnly(13, 15),
+                ReservedOn = DateTime.Now.AddMinutes(-14)
+            };
+
+            var appointment2 = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 15),
+                AppointmentTo = new TimeOnly(13, 30),
+                ReservedOn = DateTime.Now.AddMinutes(-14)
+            };
+
+            var appointment3 = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 30),
+                AppointmentTo = new TimeOnly(13, 45),
+                ReservedOn = DateTime.Now.AddMinutes(-14),
+                Confirmed = true
+            };
+
+            var appointment4 = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 45),
+                AppointmentTo = new TimeOnly(14, 0),
+                ReservedOn = DateTime.Now.AddMinutes(-16),
+            };
+
+            await sut.Add(appointment1);
+            await sut.Add(appointment2);
+            await sut.Add(appointment3);
+            await sut.Add(appointment4);
+            var appointments = await sut.Get();
+            Assert.That(appointments.Count, Is.EqualTo(2));
         }
     }
 }

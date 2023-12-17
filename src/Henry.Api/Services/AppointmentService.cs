@@ -1,6 +1,7 @@
 ﻿using Henry.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Henry.Api.Services
 {
@@ -22,7 +23,7 @@ namespace Henry.Api.Services
         /// </summary>
         /// <param name="appointment">The appointment to add</param>
         /// <exception cref="ValidationException"></exception>
-        public async Task AddAppointment(Appointment appointment)
+        public async Task Add(Appointment appointment)
         {
             if (!AppointmentIs15MinuteBlock(appointment))
                 throw new ValidationException("Appointments must be in 15 minute blocks");
@@ -37,7 +38,7 @@ namespace Henry.Api.Services
         /// Places a Reservation on an appointment
         /// </summary>
         /// <param name="appointment">The appointment to reserve</param>
-        public async Task ReserveAppointment(Appointment appointment)
+        public async Task Reserve(Appointment appointment)
         {
             appointment.ReservedOn = DateTime.Now;
             _db.Appointments.Update(appointment);
@@ -49,7 +50,7 @@ namespace Henry.Api.Services
         /// </summary>
         /// <param name="appointment">The appointment to confirm</param>
         /// <exception cref="ValidationException"></exception>
-        public async Task ConfirmAppointment(Appointment appointment)
+        public async Task Confirm(Appointment appointment)
         {
             if (!AppointmentIsConfirmable(appointment))
                 throw new ValidationException("Appointment reservation is more than 15 minutes old and can not be confirmed");
@@ -59,7 +60,31 @@ namespace Henry.Api.Services
             await _db.SaveChangesAsync();
         }
 
-        // Probably a custom validatation attribute would be a better approach here but this will do for time constraints
+        /// <summary>
+        /// Gets all available appointments including stale reservations
+        /// </summary>
+        /// <returns>A list of all available appointments</returns>
+        public async Task<List<Appointment>> Get()
+        { 
+            return await _db.Appointments
+                .Where(x => x.Confirmed == false
+                    && x.ReservedOn > DateTime.Now.AddMinutes(-15))
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets an appointment by Id
+        /// </summary>
+        /// <param name="Id">The Id of the appointment</param>
+        /// <returns>The appointment or null if not found</returns>
+        public async Task<Appointment?> Get(int Id) => await _db.Appointments.FindAsync(Id);
+
+        #region Validation
+        // *********************************************************************** //
+        // Probably custom validatation attributes would be a better approach here //
+        // but this will do for time constraints                                   //
+        // *********************************************************************** //
+
         /// <summary>
         /// Checks that an appointment is in an exact 15 minute block
         /// </summary>
@@ -97,5 +122,7 @@ namespace Henry.Api.Services
             var existingAppointment = await appointmentExistsQuery.FirstOrDefaultAsync();
             return existingAppointment is not null;
         }
+
+        #endregion
     }
 }
