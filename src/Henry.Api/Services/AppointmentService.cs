@@ -44,12 +44,27 @@ namespace Henry.Api.Services
             await _db.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Confirms an appointment
+        /// </summary>
+        /// <param name="appointment">The appointment to confirm</param>
+        /// <exception cref="ValidationException"></exception>
+        public async Task ConfirmAppointment(Appointment appointment)
+        {
+            if (!AppointmentIsConfirmable(appointment))
+                throw new ValidationException("Appointment reservation is more than 15 minutes old and can not be confirmed");
+            
+            appointment.Confirmed = true;
+            _db.Appointments.Update(appointment);
+            await _db.SaveChangesAsync();
+        }
+
         // Probably a custom validatation attribute would be a better approach here but this will do for time constraints
         /// <summary>
         /// Checks that an appointment is in an exact 15 minute block
         /// </summary>
         /// <param name="appointment">The appointment to check</param>
-        /// <returns>True or False indicating if the appoint time block is valid</returns>
+        /// <returns>Boolean indicating if the appoint time block is valid</returns>
         private bool AppointmentIs15MinuteBlock(Appointment appointment)
         {
             var duration = appointment.AppointmentTo - appointment.AppointmentFrom;
@@ -59,10 +74,17 @@ namespace Henry.Api.Services
         }
 
         /// <summary>
+        /// Checks that an appointment reservation isn't older than 15 minutes
+        /// </summary>
+        /// <param name="appointment">The appointment to check</param>
+        /// <returns>Boolean indicating if the appointment can be reserved</returns>
+        private bool AppointmentIsConfirmable(Appointment appointment) => appointment.ReservedOn > DateTime.Now.AddMinutes(-15);
+
+        /// <summary>
         /// Checks if an appointment already exists
         /// </summary>
         /// <param name="appointment">The appointment to check</param>
-        /// <returns>True or False indicating if the appointment exists</returns>
+        /// <returns>Boolean indicating if the appointment exists</returns>
         private async Task<bool> AppointmentExists(Appointment appointment)
         {
             var appointmentExistsQuery = _db.Appointments.Where(x => 

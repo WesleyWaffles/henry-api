@@ -74,6 +74,47 @@ namespace Henry.Api.UnitTests
             await sut.ReserveAppointment(validAppointment);
             Assert.That(validAppointment.ReservedOn, Is.GreaterThan(_globalDefaultDateTime));
         }
+
+        [Test]
+        public async Task FailToConfirmReservationsOlderThan15Minutes()
+        {
+            await using var db = new InMemoryDb().CreateDbContext();
+            var sut = new AppointmentService(db);
+
+            var staleAppointment = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 0),
+                AppointmentTo = new TimeOnly(13, 15),
+                ReservedOn = DateTime.Now.AddMinutes(-16)
+            };
+
+            await sut.AddAppointment(staleAppointment);
+            Assert.ThrowsAsync<ValidationException>(async () => await sut.ConfirmAppointment(staleAppointment));
+        }
+
+        [Test]
+        public async Task SuccessfullyConfirmReservationsNewerThan15Minutes()
+        {
+            await using var db = new InMemoryDb().CreateDbContext();
+            var sut = new AppointmentService(db);
+
+            var freshAppointment = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(2024, 01, 05),
+                AppointmentFrom = new TimeOnly(13, 0),
+                AppointmentTo = new TimeOnly(13, 15),
+                ReservedOn = DateTime.Now.AddMinutes(-14)
+            };
+
+            await sut.AddAppointment(freshAppointment);
+            await sut.ConfirmAppointment(freshAppointment);
+            Assert.That(freshAppointment.Confirmed, Is.True);
+        }
     }
 }
 
