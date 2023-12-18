@@ -40,6 +40,9 @@ namespace Henry.Api.Services
         /// <param name="appointment">The appointment to reserve</param>
         public async Task Reserve(Appointment appointment)
         {
+            if (!AppointmentIsReservable(appointment))
+                throw new ValidationException("Appointments must be reserved at least 24 hours in advance");
+
             appointment.ReservedOn = DateTime.Now;
             _db.Appointments.Update(appointment);
             await _db.SaveChangesAsync();
@@ -61,10 +64,16 @@ namespace Henry.Api.Services
         }
 
         /// <summary>
+        /// Gets all appointments
+        /// </summary>
+        /// <returns>A list of all appointments</returns>
+        public async Task<List<Appointment>> Get() => await _db.Appointments.ToListAsync();
+
+        /// <summary>
         /// Gets all available appointments including stale reservations
         /// </summary>
         /// <returns>A list of all available appointments</returns>
-        public async Task<List<Appointment>> Get()
+        public async Task<List<Appointment>> GetAvailable()
         { 
             return await _db.Appointments
                 .Where(x => x.Confirmed == false
@@ -106,6 +115,24 @@ namespace Henry.Api.Services
         private bool AppointmentIsConfirmable(Appointment appointment) => appointment.ReservedOn > DateTime.Now.AddMinutes(-30);
 
         /// <summary>
+        /// Checks that an appointment is being reserved at least 24 hours in advance
+        /// </summary>
+        /// <param name="appointment">The appointment to check</param>
+        /// <returns>Boolean indicating if the appointment is reservable</returns>
+        private bool AppointmentIsReservable(Appointment appointment)
+        {
+            var now = DateTime.Now;
+            var appointmentStartTime = new DateTime(
+                appointment.AppointmentOn.Year, 
+                appointment.AppointmentOn.Month, 
+                appointment.AppointmentOn.Day, 
+                appointment.AppointmentFrom.Hour, 
+                appointment.AppointmentFrom.Minute, 
+                0);
+            return appointmentStartTime >= now.AddHours(24);
+        }
+
+        /// <summary>
         /// Checks if an appointment already exists
         /// </summary>
         /// <param name="appointment">The appointment to check</param>
@@ -113,8 +140,8 @@ namespace Henry.Api.Services
         private async Task<bool> AppointmentExists(Appointment appointment)
         {
             var appointmentExistsQuery = _db.Appointments.Where(x => 
-                x.ProviderName == appointment.ProviderName
-                && x.ClientName == appointment.ClientName
+                x.Provider == appointment.Provider
+                && x.Client == appointment.Client
                 && x.AppointmentOn == appointment.AppointmentOn 
                 && x.AppointmentFrom == appointment.AppointmentFrom
                 && x.AppointmentTo == appointment.AppointmentTo);

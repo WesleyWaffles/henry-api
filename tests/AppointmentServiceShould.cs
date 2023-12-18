@@ -6,14 +6,15 @@ namespace Henry.Api.UnitTests
 {
     public class AppointmentServiceShould
     {
-        private string _globalProvider;
-        private string _globalClient;
+        private Provider _globalProvider;
+        private Client _globalClient;
+        private DateTime _globalDefaultDateTime;
 
         [SetUp]
         public void Setup()
         {
-            _globalProvider = "Lando Calrisian";
-            _globalClient = "Han Solo";
+            _globalProvider = new Provider { Id = 1, Name = "Lando Calrisian" };
+            _globalClient = new Client { Id = 1, Name = "Han Solo" };
         }
 
         [Test]
@@ -21,11 +22,11 @@ namespace Henry.Api.UnitTests
         {
             await using var db = new InMemoryDb().CreateDbContext();
             var sut = new AppointmentService(db);
-            
+
             var tooLongAppointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(14, 0)
@@ -42,8 +43,8 @@ namespace Henry.Api.UnitTests
 
             var validAppointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15)
@@ -61,8 +62,8 @@ namespace Henry.Api.UnitTests
 
             var validAppointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15)
@@ -70,7 +71,7 @@ namespace Henry.Api.UnitTests
 
             await sut.Add(validAppointment);
             await sut.Reserve(validAppointment);
-            Assert.That(validAppointment.ReservedOn, Is.Not.Null);
+            Assert.That(validAppointment.ReservedOn, Is.GreaterThan(_globalDefaultDateTime));
         }
 
         [Test]
@@ -81,8 +82,8 @@ namespace Henry.Api.UnitTests
 
             var staleAppointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -101,8 +102,8 @@ namespace Henry.Api.UnitTests
 
             var freshAppointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -122,8 +123,8 @@ namespace Henry.Api.UnitTests
 
             var appointment = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -135,6 +136,27 @@ namespace Henry.Api.UnitTests
         }
 
         [Test]
+        public async Task Require24HourNoticeForReservation()
+        {
+            await using var db = new InMemoryDb().CreateDbContext();
+            var sut = new AppointmentService(db);
+
+            var now = DateTime.Now;
+            var appointment = new Appointment
+            {
+                Client = _globalClient,
+                Provider = _globalProvider,
+                AppointmentOn = new DateOnly(now.Year, now.Month, now.Day),
+                AppointmentFrom = new TimeOnly(13, 0),
+                AppointmentTo = new TimeOnly(13, 15),
+                ReservedOn = DateTime.Now.AddMinutes(-14)
+            };
+
+            await sut.Add(appointment);
+            Assert.ThrowsAsync<ValidationException>(async () => await sut.Reserve(appointment));
+        }
+
+        [Test]
         public async Task ReturnAllAvailableAppointmentsAndExcludeUnavailableAppointments()
         {
             await using var db = new InMemoryDb().CreateDbContext();
@@ -142,8 +164,8 @@ namespace Henry.Api.UnitTests
 
             var appointment1 = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 0),
                 AppointmentTo = new TimeOnly(13, 15),
@@ -152,8 +174,8 @@ namespace Henry.Api.UnitTests
 
             var appointment2 = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 15),
                 AppointmentTo = new TimeOnly(13, 30),
@@ -162,8 +184,8 @@ namespace Henry.Api.UnitTests
 
             var appointment3 = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 30),
                 AppointmentTo = new TimeOnly(13, 45),
@@ -173,8 +195,8 @@ namespace Henry.Api.UnitTests
 
             var appointment4 = new Appointment
             {
-                ClientName = _globalClient,
-                ProviderName = _globalProvider,
+                Client = _globalClient,
+                Provider = _globalProvider,
                 AppointmentOn = new DateOnly(2024, 01, 05),
                 AppointmentFrom = new TimeOnly(13, 45),
                 AppointmentTo = new TimeOnly(14, 0),
@@ -185,9 +207,8 @@ namespace Henry.Api.UnitTests
             await sut.Add(appointment2);
             await sut.Add(appointment3);
             await sut.Add(appointment4);
-            var appointments = await sut.Get();
+            var appointments = await sut.GetAvailable();
             Assert.That(appointments.Count, Is.EqualTo(2));
         }
     }
 }
-
