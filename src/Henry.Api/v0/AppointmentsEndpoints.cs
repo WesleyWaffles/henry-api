@@ -2,13 +2,10 @@
 using Henry.Api.Dto;
 using Henry.Api.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
-namespace Henry.Api
+namespace Henry.Api.v0
 {
-    public static class AppointmentsEndpointsV0
+    public static class AppointmentsEndpoints
     {
         private static string AppointmentVersionUri = "/api/v0/appointments";
 
@@ -17,17 +14,25 @@ namespace Henry.Api
         /// </summary>
         /// <param name="routeGroupBuilder">The route group to map endpoints to</param>
         /// <returns>A route group builder with mapped endpoints for the appointments api</returns>
-        public static RouteGroupBuilder MapAppointmentsEndpointsV0(this RouteGroupBuilder routeGroupBuilder)
+        public static RouteGroupBuilder MapAppointmentsV0Endpoints(this RouteGroupBuilder routeGroupBuilder)
         {
-            routeGroupBuilder.MapGet("/available", GetAvailableAppointments);
-            
-            routeGroupBuilder.MapGet("/{id}", GetAppointment);
-            
-            routeGroupBuilder.MapPost("/", CreateAppointment);
+            routeGroupBuilder.MapGet("/", GetAllAppointments)
+                .WithOpenApi();
 
-            routeGroupBuilder.MapPut("/{id}/reserve", ReserveAppointment);
+            routeGroupBuilder.MapGet("/available", GetAvailableAppointments)
+                .WithOpenApi();
 
-            routeGroupBuilder.MapPut("/{id}/confirm", ConfirmAppointment);
+            routeGroupBuilder.MapGet("/{id}", GetAppointment)
+                .WithOpenApi();
+
+            routeGroupBuilder.MapPost("/", CreateAppointment)
+                .WithOpenApi();
+
+            routeGroupBuilder.MapPut("/{id}/reserve", ReserveAppointment)
+                .WithOpenApi();
+
+            routeGroupBuilder.MapPut("/{id}/confirm", ConfirmAppointment)
+                .WithOpenApi();
 
             return routeGroupBuilder;
         }
@@ -55,6 +60,18 @@ namespace Henry.Api
         {
             var availableAppointments = await appointments.GetAvailable();
             var appointmentDtos = availableAppointments.Select(x => GetAppointmentDto(x)).ToList();
+            return TypedResults.Ok(appointmentDtos);
+        }
+
+        /// <summary>
+        /// Gets all appointments regardless of availability
+        /// </summary>
+        /// <param name="appointments">The appointment service to use</param>
+        /// <returns>A list of all appointments</returns>
+        public static async Task<Ok<List<AppointmentDto>>> GetAllAppointments(AppointmentService appointments)
+        {
+            var allAppointments = await appointments.Get();
+            var appointmentDtos = allAppointments.Select(x => GetAppointmentDto(x)).ToList();
             return TypedResults.Ok(appointmentDtos);
         }
 
