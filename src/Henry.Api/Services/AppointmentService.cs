@@ -30,6 +30,10 @@ namespace Henry.Api.Services
             if (await AppointmentExists(appointment))
                 throw new ValidationException("Appointment already exists");
 
+            _db.Attach(appointment.Provider);
+            if (appointment.Client != null)
+                _db.Attach(appointment.Client);
+
             await _db.Appointments.AddAsync(appointment);
             await _db.SaveChangesAsync();
         }
